@@ -53,4 +53,4 @@ Date and time come from the system clock via `date`, never from an estimate.
 - **Nature of Contribution**: Draft / Code generation
 - **Human Review Status**: Partially reviewed. The text was reviewed in the claude.ai doc; the
   static page has not yet been viewed in a browser.
-- **Git Hash**: Filled in after committing
+- **Git Hash**: 710b09c (PR pending)
