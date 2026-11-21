@@ -53,4 +53,22 @@ Date and time come from the system clock via `date`, never from an estimate.
 - **Nature of Contribution**: Draft / Code generation
 - **Human Review Status**: Partially reviewed. The text was reviewed in the claude.ai doc; the
   static page has not yet been viewed in a browser.
-- **Git Hash**: 710b09c (PR pending)
+- **Git Hash**: 710b09c (PR #2)
+
+## [2026-11-21 20:19 UTC]
+- **Tool**: Claude (Anthropic), claude-opus-5-5
+- **Session Purpose**: Label the board's axes, columns, and rows in raised English print and UEB
+  Grade 1 Braille, built into the print, following a review recommendation relayed by
+  N. A. Frissell. Move the board geometry into one module shared by the viewer and the brief.
+- **Sections/Files Affected**: `board.js` (new: geometry, labels, Braille), `index.html` (uses
+  `board.js`; integer cycle sliders; print-bed size shown), `brief.html` (embedded model uses
+  `board.js`; specs, steps, and open questions updated for the labels), `README.md`,
+  `ai/ai_usage_log.md`
+- **Nature of Contribution**: Code generation / Draft / Research (Braille dot dimensions from
+  the US Access Board's ADA Chapter 7 guide; Braille translation with liblouis 3.20.0)
+- **Human Review Status**: Pending review. Checked in Node.js against three.js 0.160.0: the
+  default board builds at 230.4 × 226.4 × 18.0 mm; all 28 slider label strings and the three
+  axis words match liblouis `en-ueb-g1.ctb` exactly; a top-view render of the exported STL shows
+  print and Braille in place. Not yet viewed in a browser, and the printed Braille has not been
+  read by a Braille reader.
+- **Git Hash**: 2ac1765 (PR pending)
