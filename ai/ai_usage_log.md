@@ -40,7 +40,7 @@ Date and time come from the system clock via `date`, never from an estimate.
 - **Human Review Status**: Partially reviewed. Geometry and STL export were checked in Node.js
   against three.js 0.160.0 (184 × 184 × 18 mm, waves facing +z). N. A. Frissell viewed the live
   page on GitHub Pages on 2026-11-21 and approved its appearance.
-- **Git Hash**: 7318e84 (PR pending)
+- **Git Hash**: 7318e84 (PR #1)
 
 ## [2026-11-21 19:38 UTC]
 - **Tool**: Claude (Anthropic), claude-opus-5-5
