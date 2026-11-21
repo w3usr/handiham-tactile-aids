@@ -10,6 +10,8 @@ Project lead: Nathaniel A. Frissell, W2NAF.
 
 **Interactive 3D viewer:** <https://w3usr.github.io/handiham-tactile-aids/>
 
+**Design brief:** <https://w3usr.github.io/handiham-tactile-aids/brief.html>
+
 A 3D-printable demonstration board of nine 2-inch square tiles, each carrying a sine wave a
 student traces by touch:
 

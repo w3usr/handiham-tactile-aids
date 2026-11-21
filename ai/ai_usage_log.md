@@ -37,7 +37,20 @@ Date and time come from the system clock via `date`, never from an estimate.
   `README.md`, `LICENSE` (official CC BY 4.0 legal code, downloaded unchanged from
   creativecommons.org), `ai/ai_usage_log.md` (new)
 - **Nature of Contribution**: Code generation / Draft
-- **Human Review Status**: Pending review. Geometry and STL export were checked in Node.js
-  against three.js 0.160.0 (184 × 184 × 18 mm, waves facing +z); the in-browser rendering has
-  not yet been viewed.
+- **Human Review Status**: Partially reviewed. Geometry and STL export were checked in Node.js
+  against three.js 0.160.0 (184 × 184 × 18 mm, waves facing +z). N. A. Frissell viewed the live
+  page on GitHub Pages on 2026-11-21 and approved its appearance.
 - **Git Hash**: 7318e84 (PR pending)
+
+## [2026-11-21 19:38 UTC]
+- **Tool**: Claude (Anthropic), claude-opus-5-5
+- **Session Purpose**: Publish the Wave Grid 3×3 design brief as a static page that can be shared
+  without a login. The brief was first drafted in a claude.ai doc under N. A. Frissell's
+  direction and reviewed there; this page carries the same text, with the builder's name left
+  off for the public version, and embeds an interactive three.js model of the board.
+- **Sections/Files Affected**: `brief.html` (new), `README.md` (link to the brief),
+  `ai/ai_usage_log.md` (this entry; review status of the previous entry updated)
+- **Nature of Contribution**: Draft / Code generation
+- **Human Review Status**: Partially reviewed. The text was reviewed in the claude.ai doc; the
+  static page has not yet been viewed in a browser.
+- **Git Hash**: Filled in after committing
