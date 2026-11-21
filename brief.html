@@ -62,7 +62,8 @@ the fingers have room to feel it.</p>
   </div>
   <figcaption>3D model at default settings, heights at true scale. Drag to rotate, scroll to zoom.
   Frequency rises from left to right (1, 2, 4 cycles per tile); amplitude falls from back to front (6, 3, 1.5 mm).
-  The dot marks the front-left corner. To change the parameters or export a print file, open the
+  Raised print with Braille beneath labels the axes, columns, and rows, and the dot marks the front-left corner.
+  To change the parameters or export a print file, open the
   <a href="./">full viewer</a>.</figcaption>
 </figure>
 
@@ -72,10 +73,12 @@ the fingers have room to feel it.</p>
     <tr><td>Tiles</td><td>9, each 2 × 2 in (50.8 mm)</td></tr>
     <tr><td>Frequency (columns, left to right)</td><td>1, 2, 4 cycles per tile</td></tr>
     <tr><td>Amplitude (rows, back to front)</td><td>6, 3, 1.5 mm peak</td></tr>
-    <tr><td>Board size</td><td>184 × 184 mm, 18 mm tall</td></tr>
+    <tr><td>Board size</td><td>230 × 226 mm, 18 mm tall; needs a print bed of at least 231 × 227 mm</td></tr>
     <tr><td>Shortest period</td><td>12.7 mm</td></tr>
     <tr><td>Steepest slope</td><td>about 71°, printable without supports</td></tr>
-    <tr><td>Tactile aids</td><td>4 mm grooves between tiles, a rim at the zero level, Braille label strips on the left and back, an orientation dot at the front-left corner</td></tr>
+    <tr><td>Labels</td><td>Raised print with Unified English Braille (Grade 1) beneath: “frequency” and each column’s cycles on the back strip, “amplitude” and each row’s height on the left strip, “time” with a raised arrow on the front strip</td></tr>
+    <tr><td>Braille dots</td><td>1.6 mm domed, 0.8 mm tall, 2.4 mm apart in a cell, 6.2 mm cell to cell, within the ADA sign ranges</td></tr>
+    <tr><td>Other tactile cues</td><td>4 mm grooves between tiles, a rim at the zero level, an 8 mm orientation dot at the front-left corner</td></tr>
   </tbody>
 </table>
 <p>Every tile starts at the same phase, so the tiles differ only in frequency and amplitude. Nothing has been printed
@@ -86,6 +89,7 @@ yet. The first print should check whether 0.2 mm layer steps are felt on the 1.5
 first pass; after that, the student can explore alone.</p>
 <ol>
   <li><strong>Orient.</strong> Find the raised dot at the front-left corner and square up the board.</li>
+  <li><strong>Read the labels.</strong> The back strip names the frequency axis and each column. The left strip names the amplitude axis and each row. The front strip says “time,” with an arrow pointing the way time runs.</li>
   <li><strong>Find the reference.</strong> Trace the rim. It sits at the zero level, so crests rise above it and troughs dip below it.</li>
   <li><strong>Compare frequencies.</strong> Trace the back row from left to right. The crests stay equally tall, and each tile packs in more of them: 1, then 2, then 4 cycles.</li>
   <li><strong>Compare amplitudes.</strong> Trace the left column from back to front. Each tile has one cycle, and the crests shrink: 6, then 3, then 1.5 mm.</li>
@@ -116,9 +120,10 @@ tiles teach wavelength. Three inexpensive steps soften the frequency limits:</p>
   <li><strong>Amplitude steps.</strong> Are 6, 3, and 1.5 mm clearly distinct by touch? Is 1.5 mm too subtle, or 6 mm too sharp at 4 cycles?</li>
   <li><strong>Surface.</strong> Will 0.2 mm layer steps be felt on the gentle tiles? Options: 0.1 mm layers, ironing, or light sanding.</li>
   <li><strong>Grooves.</strong> Do 4 mm grooves mark tile boundaries clearly without catching a fingertip?</li>
-  <li><strong>Label strips.</strong> Are the 16 mm left and back rim strips wide enough for Dymo Braille tape?</li>
+  <li><strong>Printed Braille.</strong> Do the printed dots read cleanly by touch, and does the raised print stay legible? If the dots print poorly, Dymo Braille labels on the same strips are the fallback.</li>
+  <li><strong>Printer.</strong> The labeled board is 230 × 226 mm. If the available printer bed is smaller, the label strips can print as separate pieces that pin onto the base.</li>
   <li><strong>Material.</strong> PLA or PETG, and which finish feels best?</li>
-  <li><strong>One piece or tiles.</strong> Print the 184 mm board whole, or as separate tiles that drop into a frame so they can be swapped and rearranged?</li>
+  <li><strong>One piece or tiles.</strong> Print the board whole, or as separate tiles that drop into a frame so they can be swapped and rearranged?</li>
 </ul>
 <p><strong>For the project lead:</strong></p>
 <ul>
@@ -146,14 +151,10 @@ tiles teach wavelength. Three inexpensive steps soften the frequency limits:</p>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { buildBoard, DEFAULTS, FONT_URL } from './board.js';
 
-// Same geometry as index.html at its default settings (mm).
-// Board coordinates: x = time (left to right), z = depth (back to front), y = height.
-const L = 50.8, W = 50.8, GAP = 4, M_LABEL = 16, M_EDGE = 8, PLATE = 3, FLOOR = 3, N = 240;
-const FREQ = [1, 2, 4], AMP = [6, 3, 1.5];
-const BOARD_W = M_LABEL + 3 * L + 2 * GAP + M_EDGE, BOARD_D = M_LABEL + 3 * W + 2 * GAP + M_EDGE;
-const Z0 = FLOOR + Math.max(...AMP);
-
+// The same board module the viewer uses (board.js), at its default settings.
 const host = document.getElementById('model');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -163,13 +164,6 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf4f5f7);
 const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
 const controls = new OrbitControls(camera, renderer.domElement);
-const center = new THREE.Vector3(BOARD_W / 2, 0, BOARD_D / 2);
-const home = () => {
-  camera.position.set(BOARD_W * 0.15, 260, BOARD_D * 1.75);
-  controls.target.copy(center);
-  controls.update();
-};
-home();
 controls.enableDamping = true;
 
 scene.add(new THREE.HemisphereLight(0xffffff, 0x606070, 0.9));
@@ -177,41 +171,22 @@ const key = new THREE.DirectionalLight(0xffffff, 1.5);
 key.position.set(-150, 220, 120);
 scene.add(key);
 
-const tileMat = new THREE.MeshStandardMaterial({ color: 0x2a64ad, roughness: 0.6 });
-const baseMat = new THREE.MeshStandardMaterial({ color: 0xd8d0bc, roughness: 0.8 });
+const mats = {
+  tile: new THREE.MeshStandardMaterial({ color: 0x2a64ad, roughness: 0.6 }),
+  frame: new THREE.MeshStandardMaterial({ color: 0xd8d0bc, roughness: 0.8 }),
+  print: new THREE.MeshStandardMaterial({ color: 0x1d2025, roughness: 0.6 }),
+};
+const font = await new FontLoader().loadAsync(FONT_URL);
+const { group, size } = buildBoard(DEFAULTS, font, mats);
+scene.add(group);
 
-function tile(A, cycles) {
-  const s = new THREE.Shape();
-  s.moveTo(0, 0);
-  for (let i = 0; i <= N; i++) {
-    const x = (L * i) / N;
-    s.lineTo(x, Z0 + A * Math.sin((2 * Math.PI * cycles * x) / L));
-  }
-  s.lineTo(L, 0);
-  return new THREE.ExtrudeGeometry(s, { depth: W, bevelEnabled: false });
-}
-function box(w, h, d, x, y, z) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), baseMat);
-  m.position.set(x + w / 2, y + h / 2, z + d / 2);
-  scene.add(m);
-}
-
-box(BOARD_W, PLATE, BOARD_D, 0, 0, 0);
-box(M_LABEL, Z0, BOARD_D, 0, PLATE, 0);
-box(BOARD_W - M_LABEL, Z0, M_LABEL, M_LABEL, PLATE, 0);
-box(M_EDGE, Z0, BOARD_D - M_LABEL, BOARD_W - M_EDGE, PLATE, M_LABEL);
-box(BOARD_W - M_LABEL - M_EDGE, Z0, M_EDGE, M_LABEL, PLATE, BOARD_D - M_EDGE);
-for (let r = 0; r < 3; r++) {
-  for (let c = 0; c < 3; c++) {
-    const m = new THREE.Mesh(tile(AMP[r], FREQ[c]), tileMat);
-    m.position.set(M_LABEL + c * (L + GAP), PLATE, M_LABEL + r * (W + GAP));
-    scene.add(m);
-  }
-}
-const dot = new THREE.Mesh(new THREE.SphereGeometry(4, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2),
-  new THREE.MeshStandardMaterial({ color: 0x1d2025 }));
-dot.position.set(M_LABEL / 2, PLATE + Z0, BOARD_D - M_EDGE / 2 - 4);
-scene.add(dot);
+const center = new THREE.Vector3(size.width / 2, 0, size.depth / 2);
+const home = () => {
+  camera.position.set(size.width * 0.3, 300, size.depth * 1.7);
+  controls.target.copy(center);
+  controls.update();
+};
+home();
 
 function rotate(deg) {
   const v = camera.position.clone().sub(controls.target);
