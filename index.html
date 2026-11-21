@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wave Grid 3x3: tactile frequency/amplitude prototype</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1c1e23; color: #e8e8e8;
+               font-family: system-ui, sans-serif; }
+  #ui { position: absolute; top: 12px; left: 12px; width: 290px; padding: 12px 14px;
+        background: rgba(10, 12, 16, 0.82); border-radius: 8px; font-size: 13px; line-height: 1.4; }
+  #ui h1 { font-size: 15px; margin: 0 0 6px; }
+  #ui h2 { font-size: 12px; margin: 10px 0 4px; text-transform: uppercase; letter-spacing: .06em; color: #9ab; }
+  .row { display: grid; grid-template-columns: 88px 1fr 46px; align-items: center; gap: 6px; margin: 2px 0; }
+  .row input[type=range] { width: 100%; }
+  .val { text-align: right; font-variant-numeric: tabular-nums; }
+  label.chk { display: block; margin: 3px 0; }
+  button { margin-top: 8px; padding: 6px 10px; border: 0; border-radius: 5px; background: #3b82c4;
+           color: white; font-size: 13px; cursor: pointer; }
+  button:hover { background: #4a94d8; }
+  #dims { margin-top: 8px; color: #bcc; font-size: 12px; }
+  #help { position: absolute; right: 12px; bottom: 10px; left: 12px; font-size: 12px; color: #889; }
+  .lbl { color: #fff; font-size: 12px; background: rgba(0,0,0,.55); padding: 2px 6px; border-radius: 4px;
+         white-space: nowrap; pointer-events: none; }
+</style>
+<script type="importmap">
+{ "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="ui">
+  <h1>Wave Grid 3×3 (prototype)</h1>
+  <div>Columns: frequency, low → high (left → right).<br>
+       Rows: amplitude, high → low (back → front).<br>
+       x axis = time, height = signal, depth = 2&Prime; of extrusion to feel.</div>
+
+  <h2>Cycles per 2&Prime; tile</h2>
+  <div class="row"><label for="f0">Low f</label><input id="f0" type="range" min="0.5" max="8" step="0.5" value="1"><output class="val" id="f0v" for="f0"></output></div>
+  <div class="row"><label for="f1">Medium f</label><input id="f1" type="range" min="0.5" max="8" step="0.5" value="2"><output class="val" id="f1v" for="f1"></output></div>
+  <div class="row"><label for="f2">High f</label><input id="f2" type="range" min="0.5" max="8" step="0.5" value="4"><output class="val" id="f2v" for="f2"></output></div>
+
+  <h2>Amplitude (peak, mm)</h2>
+  <div class="row"><label for="a0">High A</label><input id="a0" type="range" min="0.5" max="10" step="0.5" value="6"><output class="val" id="a0v" for="a0"></output></div>
+  <div class="row"><label for="a1">Medium A</label><input id="a1" type="range" min="0.5" max="10" step="0.5" value="3"><output class="val" id="a1v" for="a1"></output></div>
+  <div class="row"><label for="a2">Low A</label><input id="a2" type="range" min="0.5" max="10" step="0.5" value="1.5"><output class="val" id="a2v" for="a2"></output></div>
+
+  <h2>Display</h2>
+  <label class="chk"><input id="frame" type="checkbox" checked> Frame rim at zero level (reference)</label>
+  <label class="chk"><input id="colors" type="checkbox"> Color tiles by row</label>
+  <label class="chk"><input id="labels" type="checkbox" checked> Show text labels</label>
+  <button id="stl">Export STL (mm)</button>
+  <div id="dims"></div>
+</div>
+<div id="help">Drag to rotate · scroll to zoom · right-drag to pan. All dimensions true scale, in mm. Built with AI assistance (Claude); see the
+  <a href="https://github.com/w3usr/handiham-tactile-aids" style="color:#9ab">repository</a> for the AI usage log.</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+
+// ---- Geometry constants (mm). Board coordinates: x = time (left->right),
+// z = board depth (back -> front, toward the student), y = height.
+const IN = 25.4;
+const L = 2 * IN;        // tile length along time axis (2 in)
+const W = 2 * IN;        // tile depth (2 in of extrusion to feel)
+const GAP = 4;           // groove between tiles, a tactile boundary
+const M_LABEL = 16;      // wider margins (left, back) for Braille label strips
+const M_EDGE = 8;        // plain margins (right, front)
+const PLATE = 3;         // base plate thickness
+const FLOOR = 3;         // minimum solid under the deepest trough
+const N = 240;           // samples along each sinusoid
+
+const BOARD_W = M_LABEL + 3 * L + 2 * GAP + M_EDGE;
+const BOARD_D = M_LABEL + 3 * W + 2 * GAP + M_EDGE;
+
+// ---- Renderer, scene, camera
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(innerWidth, innerHeight);
+Object.assign(labelRenderer.domElement.style, { position: 'absolute', top: '0', pointerEvents: 'none' });
+document.body.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1c1e23);
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 1, 5000);
+camera.position.set(BOARD_W * 0.5, 230, BOARD_D * 1.75);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(BOARD_W / 2, 0, BOARD_D / 2);
+controls.enableDamping = true;
+controls.update();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x404050, 0.9));
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(-150, 220, 120);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.5);
+fill.position.set(300, 120, -200);
+scene.add(fill);
+
+const grid = new THREE.GridHelper(400, 16, 0x445, 0x2c2f36); // 25 mm squares
+grid.position.set(BOARD_W / 2, -0.01, BOARD_D / 2);
+scene.add(grid);
+
+const model = new THREE.Group();   // everything that gets printed
+const labels = new THREE.Group();  // on-screen text only, never exported
+scene.add(model, labels);
+
+const $ = id => document.getElementById(id);
+const params = () => ({
+  f: [0, 1, 2].map(i => +$('f' + i).value),
+  a: [0, 1, 2].map(i => +$('a' + i).value),
+  frame: $('frame').checked, colors: $('colors').checked, labels: $('labels').checked,
+});
+
+// One tile: a 2D profile (x = time, y = height) extruded along +z by W.
+// Every tile starts at phase 0, rising, so only frequency and amplitude differ.
+function tileGeometry(z0, A, cycles) {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0);
+  for (let i = 0; i <= N; i++) {
+    const x = (L * i) / N;
+    s.lineTo(x, z0 + A * Math.sin((2 * Math.PI * cycles * x) / L));
+  }
+  s.lineTo(L, 0);
+  return new THREE.ExtrudeGeometry(s, { depth: W, bevelEnabled: false, steps: 1 });
+}
+
+function box(w, h, d, x, y, z, mat) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x + w / 2, y + h / 2, z + d / 2);
+  return m;
+}
+
+function label(text, x, y, z) {
+  const div = document.createElement('div');
+  div.className = 'lbl';
+  div.textContent = text;
+  const o = new CSS2DObject(div);
+  o.position.set(x, y, z);
+  labels.add(o);
+}
+
+function clear(group) {
+  for (const c of [...group.children]) {
+    group.remove(c);
+    c.geometry?.dispose();
+    if (c.element) c.element.remove();
+  }
+}
+
+const baseMat = new THREE.MeshStandardMaterial({ color: 0xece4d0, roughness: 0.75 });
+const labelMat = new THREE.MeshStandardMaterial({ color: 0xc9bfa6, roughness: 0.8 });
+const rowMats = [0xe07b39, 0x3b82c4, 0x6aa84f].map(c =>
+  new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
+
+function build() {
+  const p = params();
+  ['f0', 'f1', 'f2'].forEach((id, i) => $(id + 'v').textContent = p.f[i]);
+  ['a0', 'a1', 'a2'].forEach((id, i) => $(id + 'v').textContent = p.a[i]);
+  clear(model); clear(labels);
+
+  const aMax = Math.max(...p.a);
+  const z0 = FLOOR + aMax;            // zero line height above the plate top
+  const zeroY = PLATE + z0;           // zero line height above the table
+
+  // Base plate
+  model.add(box(BOARD_W, PLATE, BOARD_D, 0, 0, 0, baseMat));
+
+  // Tiles: column = frequency, row = amplitude (row 0 = back = high A)
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      const m = new THREE.Mesh(tileGeometry(z0, p.a[r], p.f[c]), p.colors ? rowMats[r] : baseMat);
+      m.position.set(M_LABEL + c * (L + GAP), PLATE, M_LABEL + r * (W + GAP));
+      model.add(m);
+    }
+  }
+
+  // Frame rim at the zero level: a reference surface and Braille label strips
+  if (p.frame) {
+    const h = z0;
+    model.add(box(M_LABEL, h, BOARD_D, 0, PLATE, 0, labelMat));                       // left: amplitude labels
+    model.add(box(BOARD_W - M_LABEL, h, M_LABEL, M_LABEL, PLATE, 0, labelMat));       // back: frequency labels
+    model.add(box(M_EDGE, h, BOARD_D - M_LABEL, BOARD_W - M_EDGE, PLATE, M_LABEL, baseMat)); // right
+    model.add(box(BOARD_W - M_LABEL - M_EDGE, h, M_EDGE, M_LABEL, PLATE, BOARD_D - M_EDGE, baseMat)); // front
+    // Orientation dot: front-left corner, so the student can square up the board
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(4, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), baseMat);
+    dot.position.set(M_LABEL / 2, zeroY, BOARD_D - M_EDGE / 2 - 4);
+    model.add(dot);
+  }
+
+  if (p.labels) {
+    const fNames = ['Low f', 'Medium f', 'High f'];
+    const aNames = ['High A', 'Medium A', 'Low A'];
+    for (let c = 0; c < 3; c++)
+      label(`${fNames[c]} (${p.f[c]} cyc)`, M_LABEL + c * (L + GAP) + L / 2, zeroY + aMax + 8, M_LABEL / 2);
+    for (let r = 0; r < 3; r++)
+      label(`${aNames[r]} (${p.a[r]} mm)`, -28, zeroY + 2, M_LABEL + r * (W + GAP) + W / 2);
+    label('time →', BOARD_W / 2, PLATE, BOARD_D + 14);
+    label('orientation dot', M_LABEL / 2, zeroY + 12, BOARD_D - M_EDGE);
+  }
+
+  const tallest = PLATE + z0 + aMax;
+  const minPeriod = L / Math.max(...p.f);
+  const steepest = Math.atan(2 * Math.PI * Math.max(...p.f) * aMax / L) * 180 / Math.PI;
+  $('dims').innerHTML =
+    `Board ${BOARD_W.toFixed(0)} × ${BOARD_D.toFixed(0)} mm ` +
+    `(${(BOARD_W / IN).toFixed(1)} × ${(BOARD_D / IN).toFixed(1)} in), ` +
+    `max height ${tallest.toFixed(1)} mm.<br>` +
+    `Shortest period ${minPeriod.toFixed(1)} mm; steepest slope ${steepest.toFixed(0)}°.`;
+}
+
+document.querySelectorAll('#ui input').forEach(el => el.addEventListener('input', build));
+
+$('stl').addEventListener('click', () => {
+  model.updateMatrixWorld(true);
+  // Rotate to z-up (slicer convention) on a copy so the view is unaffected.
+  // +90 deg about x maps (x, y, z) -> (x, -z, y): height becomes +z, the front
+  // edge (student side) faces -y, i.e. toward the slicer's front.
+  const out = model.clone();
+  out.rotation.x = Math.PI / 2;
+  out.updateMatrixWorld(true);
+  const data = new STLExporter().parse(out, { binary: true });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], { type: 'model/stl' }));
+  a.download = 'wave-grid-3x3.stl';
+  a.click();
+});
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+});
+
+build();
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
