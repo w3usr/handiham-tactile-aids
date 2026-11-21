@@ -18,7 +18,7 @@ Entries are appended newest at the bottom.
 - **Sections/Files Affected**: The specific files or documents touched
 - **Nature of Contribution**: Draft / Edit / Analysis / Code generation / Research / Scaffolding
 - **Human Review Status**: Reviewed and verified / Partially reviewed / Pending review
-- **Git Hash**: 7318e84 (PR pending)
+- **Git Hash**: Filled in after committing
 ```
 
 Date and time come from the system clock via `date`, never from an estimate.
