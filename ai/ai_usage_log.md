@@ -71,4 +71,4 @@ Date and time come from the system clock via `date`, never from an estimate.
   axis words match liblouis `en-ueb-g1.ctb` exactly; a top-view render of the exported STL shows
   print and Braille in place. Not yet viewed in a browser, and the printed Braille has not been
   read by a Braille reader.
-- **Git Hash**: Filled in after committing
+- **Git Hash**: 2ac1765 (PR pending)
