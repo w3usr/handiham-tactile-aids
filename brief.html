@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave Grid 3×3: design brief</title>
+<style>
+  :root { --ink: #1d2025; --quiet: #5b6270; --rule: #d9dce1; --accent: #2a64ad; --bg: #ffffff; --panel: #f4f5f7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 4px; }
+  .byline { color: var(--quiet); font-size: 15px; margin: 0 0 28px; }
+  h2 { font-size: 22px; margin: 40px 0 10px; padding-top: 12px; border-top: 1px solid var(--rule); }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+  th { background: var(--panel); }
+  figure { margin: 18px 0; }
+  #model { width: 100%; height: 440px; background: var(--panel); border-radius: 10px; overflow: hidden; touch-action: none; }
+  #model canvas { display: block; }
+  .controls { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  button { font: inherit; font-size: 15px; padding: 6px 14px; border: 1px solid #aab0ba; border-radius: 8px; background: white; color: var(--ink); cursor: pointer; }
+  button:hover { background: var(--panel); }
+  figcaption { color: var(--quiet); font-size: 14px; margin-top: 8px; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  ul.tasks li::before { content: "☐"; margin-right: 8px; color: var(--quiet); }
+  footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--quiet); font-size: 14px; }
+</style>
+<script type="importmap">
+{ "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<main>
+<h1>Wave Grid 3×3: design brief</h1>
+<p class="byline">University of Scranton Amateur Radio Club (W3USR) · Project lead: Nathaniel A. Frissell, W2NAF · 21 November 2026</p>
+
+<h2>Goal</h2>
+<p>This brief describes the <strong>Wave Grid 3×3</strong>, a 3D-printed board that lets a blind student feel how
+amplitude and frequency change the shape of a signal. The students are blind or visually impaired adults preparing
+for the US Technician Class amateur radio license through the Courage Kenny Handiham Program.</p>
+<p>We would like the builder's help making it a finished, tested aid: review the design, print it, and refine it
+after the first touch tests. The board covers two of the four Week 2 concepts, amplitude and frequency. Wavelength
+and phase come later.</p>
+
+<h2>The Wave Grid 3×3</h2>
+<p>A 3×3 grid of 2-inch sine-wave tiles teaches amplitude and wave shape by touch. Columns step up in frequency and
+rows step down in amplitude. The x axis is time, as on an oscilloscope trace, and the wave is extruded 2 inches so
+the fingers have room to feel it.</p>
+
+<figure>
+  <div id="model" role="img" aria-label="3D model of the Wave Grid 3x3: nine sine-wave tiles on a framed base. Frequency rises from left to right; amplitude falls from back to front."></div>
+  <div class="controls">
+    <button type="button" id="rotL">Rotate left</button>
+    <button type="button" id="rotR">Rotate right</button>
+    <button type="button" id="reset">Reset view</button>
+  </div>
+  <figcaption>3D model at default settings, heights at true scale. Drag to rotate, scroll to zoom.
+  Frequency rises from left to right (1, 2, 4 cycles per tile); amplitude falls from back to front (6, 3, 1.5 mm).
+  The dot marks the front-left corner. To change the parameters or export a print file, open the
+  <a href="./">full viewer</a>.</figcaption>
+</figure>
+
+<table>
+  <thead><tr><th scope="col">Feature</th><th scope="col">Default</th></tr></thead>
+  <tbody>
+    <tr><td>Tiles</td><td>9, each 2 × 2 in (50.8 mm)</td></tr>
+    <tr><td>Frequency (columns, left to right)</td><td>1, 2, 4 cycles per tile</td></tr>
+    <tr><td>Amplitude (rows, back to front)</td><td>6, 3, 1.5 mm peak</td></tr>
+    <tr><td>Board size</td><td>184 × 184 mm, 18 mm tall</td></tr>
+    <tr><td>Shortest period</td><td>12.7 mm</td></tr>
+    <tr><td>Steepest slope</td><td>about 71°, printable without supports</td></tr>
+    <tr><td>Tactile aids</td><td>4 mm grooves between tiles, a rim at the zero level, Braille label strips on the left and back, an orientation dot at the front-left corner</td></tr>
+  </tbody>
+</table>
+<p>Every tile starts at the same phase, so the tiles differ only in frequency and amplitude. Nothing has been printed
+yet. The first print should check whether 0.2 mm layer steps are felt on the 1.5 mm tiles.</p>
+
+<h2>How a student uses it</h2>
+<p>The board sits flat on the table with the orientation dot at the student's front left. An instructor guides the
+first pass; after that, the student can explore alone.</p>
+<ol>
+  <li><strong>Orient.</strong> Find the raised dot at the front-left corner and square up the board.</li>
+  <li><strong>Find the reference.</strong> Trace the rim. It sits at the zero level, so crests rise above it and troughs dip below it.</li>
+  <li><strong>Compare frequencies.</strong> Trace the back row from left to right. The crests stay equally tall, and each tile packs in more of them: 1, then 2, then 4 cycles.</li>
+  <li><strong>Compare amplitudes.</strong> Trace the left column from back to front. Each tile has one cycle, and the crests shrink: 6, then 3, then 1.5 mm.</li>
+  <li><strong>Separate the two ideas.</strong> Compare the back-left tile (one tall cycle) with the front-right tile (four small cycles). Height is amplitude; crowding is frequency.</li>
+</ol>
+
+<h2>Limits of the analogy</h2>
+<p>The board shows frequency as spacing along a time axis, and the student's own hand supplies the time. That makes
+it an imperfect analogy in four ways:</p>
+<ol>
+  <li><strong>The hand sets the rate.</strong> Sweeping a tile quickly or slowly changes the rate the fingertip feels, so two tiles can feel alike.</li>
+  <li><strong>The same shape is the textbook picture of wavelength.</strong> With x read as distance, these tiles show wavelength, and the exam tests the inverse relationship between the two.</li>
+  <li><strong>The fingertip feels period.</strong> Crest spacing is time per cycle; frequency is its inverse, one step removed.</li>
+  <li><strong>Steepness mixes the variables.</strong> Slope grows with frequency × amplitude, so a student may read sharpness as either one.</li>
+</ol>
+<p>The board remains a good tool for amplitude and wave shape. Relabeling the axis as distance later lets the same
+tiles teach wavelength. Three inexpensive steps soften the frequency limits:</p>
+<ul>
+  <li><strong>A Braille time scale.</strong> “1 second per tile” makes the columns read as 1, 2, and 4 Hz, a number in place of an impression.</li>
+  <li><strong>Name the period.</strong> Teach crest spacing as time per cycle, so “closer bumps” means “more cycles in the same second.”</li>
+  <li><strong>Pair it with sound.</strong> A tone whose pitch rises with frequency links the board to what the student already hears.</li>
+</ul>
+<p>A moving demonstrator would remove these limits; it is set aside for now.</p>
+
+<h2>Open questions</h2>
+<p><strong>Design and printing:</strong></p>
+<ul>
+  <li><strong>Amplitude steps.</strong> Are 6, 3, and 1.5 mm clearly distinct by touch? Is 1.5 mm too subtle, or 6 mm too sharp at 4 cycles?</li>
+  <li><strong>Surface.</strong> Will 0.2 mm layer steps be felt on the gentle tiles? Options: 0.1 mm layers, ironing, or light sanding.</li>
+  <li><strong>Grooves.</strong> Do 4 mm grooves mark tile boundaries clearly without catching a fingertip?</li>
+  <li><strong>Label strips.</strong> Are the 16 mm left and back rim strips wide enough for Dymo Braille tape?</li>
+  <li><strong>Material.</strong> PLA or PETG, and which finish feels best?</li>
+  <li><strong>One piece or tiles.</strong> Print the 184 mm board whole, or as separate tiles that drop into a frame so they can be swapped and rearranged?</li>
+</ul>
+<p><strong>For the project lead:</strong></p>
+<ul>
+  <li>Add the Braille time scale (“1 second per tile”)?</li>
+  <li>Does the board replace the current Week 2 wave board design, or join it?</li>
+</ul>
+
+<h2>Next steps</h2>
+<ul class="tasks">
+  <li>Review this brief and the <a href="./">live 3D viewer</a></li>
+  <li>Print one board at default settings</li>
+  <li>Touch-test it under blindfold, then with a blind volunteer</li>
+  <li>Have a proficient Braille reader check the labels</li>
+  <li>Adjust parameters in the viewer, export a new STL, and reprint</li>
+  <li>Write the final design into the Week 2 build document</li>
+</ul>
+
+<footer>
+  Source and print files: <a href="https://github.com/w3usr/handiham-tactile-aids">w3usr/handiham-tactile-aids</a>,
+  licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+  Drafted with AI assistance (Claude) and reviewed by Nathaniel A. Frissell, W2NAF; see the repository's AI usage log.
+</footer>
+</main>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// Same geometry as index.html at its default settings (mm).
+// Board coordinates: x = time (left to right), z = depth (back to front), y = height.
+const L = 50.8, W = 50.8, GAP = 4, M_LABEL = 16, M_EDGE = 8, PLATE = 3, FLOOR = 3, N = 240;
+const FREQ = [1, 2, 4], AMP = [6, 3, 1.5];
+const BOARD_W = M_LABEL + 3 * L + 2 * GAP + M_EDGE, BOARD_D = M_LABEL + 3 * W + 2 * GAP + M_EDGE;
+const Z0 = FLOOR + Math.max(...AMP);
+
+const host = document.getElementById('model');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+host.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf4f5f7);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+const controls = new OrbitControls(camera, renderer.domElement);
+const center = new THREE.Vector3(BOARD_W / 2, 0, BOARD_D / 2);
+const home = () => {
+  camera.position.set(BOARD_W * 0.15, 260, BOARD_D * 1.75);
+  controls.target.copy(center);
+  controls.update();
+};
+home();
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x606070, 0.9));
+const key = new THREE.DirectionalLight(0xffffff, 1.5);
+key.position.set(-150, 220, 120);
+scene.add(key);
+
+const tileMat = new THREE.MeshStandardMaterial({ color: 0x2a64ad, roughness: 0.6 });
+const baseMat = new THREE.MeshStandardMaterial({ color: 0xd8d0bc, roughness: 0.8 });
+
+function tile(A, cycles) {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0);
+  for (let i = 0; i <= N; i++) {
+    const x = (L * i) / N;
+    s.lineTo(x, Z0 + A * Math.sin((2 * Math.PI * cycles * x) / L));
+  }
+  s.lineTo(L, 0);
+  return new THREE.ExtrudeGeometry(s, { depth: W, bevelEnabled: false });
+}
+function box(w, h, d, x, y, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), baseMat);
+  m.position.set(x + w / 2, y + h / 2, z + d / 2);
+  scene.add(m);
+}
+
+box(BOARD_W, PLATE, BOARD_D, 0, 0, 0);
+box(M_LABEL, Z0, BOARD_D, 0, PLATE, 0);
+box(BOARD_W - M_LABEL, Z0, M_LABEL, M_LABEL, PLATE, 0);
+box(M_EDGE, Z0, BOARD_D - M_LABEL, BOARD_W - M_EDGE, PLATE, M_LABEL);
+box(BOARD_W - M_LABEL - M_EDGE, Z0, M_EDGE, M_LABEL, PLATE, BOARD_D - M_EDGE);
+for (let r = 0; r < 3; r++) {
+  for (let c = 0; c < 3; c++) {
+    const m = new THREE.Mesh(tile(AMP[r], FREQ[c]), tileMat);
+    m.position.set(M_LABEL + c * (L + GAP), PLATE, M_LABEL + r * (W + GAP));
+    scene.add(m);
+  }
+}
+const dot = new THREE.Mesh(new THREE.SphereGeometry(4, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+  new THREE.MeshStandardMaterial({ color: 0x1d2025 }));
+dot.position.set(M_LABEL / 2, PLATE + Z0, BOARD_D - M_EDGE / 2 - 4);
+scene.add(dot);
+
+function rotate(deg) {
+  const v = camera.position.clone().sub(controls.target);
+  v.applyAxisAngle(new THREE.Vector3(0, 1, 0), (deg * Math.PI) / 180);
+  camera.position.copy(controls.target).add(v);
+  controls.update();
+}
+document.getElementById('rotL').addEventListener('click', () => rotate(-20));
+document.getElementById('rotR').addEventListener('click', () => rotate(20));
+document.getElementById('reset').addEventListener('click', home);
+
+function resize() {
+  const w = host.clientWidth, h = host.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(host);
+resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
