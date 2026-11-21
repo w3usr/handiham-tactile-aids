@@ -90,4 +90,4 @@ Date and time come from the system clock via `date`, never from an estimate.
   with the board's tiles; every BRF line is at most 40 cells, and sample lines back-translate to
   the source text with liblouis. Not yet read by a teacher, and the BRF has not been read by a
   Braille reader or reviewed by a transcriber.
-- **Git Hash**: Filled in after committing
+- **Git Hash**: 0362358 (PR pending)
