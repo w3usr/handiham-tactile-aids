@@ -45,6 +45,21 @@ The board geometry lives in [`board.js`](board.js), shared by the viewer and the
 
 This is a first prototype, not yet printed or tested with students.
 
+## Teaching materials
+
+In [`worksheets/`](worksheets/), rebuilt from source by `worksheets/build.sh`:
+
+- **Activity guide** for a teacher guiding a student who is blind or has low vision through the
+  board, ending with questions that promote thinking and check understanding. Written once in
+  Markdown ([`activity-guide.md`](worksheets/activity-guide.md)) and produced as a
+  [web page](https://w3usr.github.io/handiham-tactile-aids/worksheets/activity-guide.html), a
+  PDF, and a Braille-ready file (BRF) in contracted UEB (Grade 2) made with liblouis. The BRF
+  layout is simple (40 cells, 25 lines per page) and is not a certified transcription.
+- **Write-in worksheet** for sighted students, with actual-size drawings of the nine tile profiles
+  from `make_profiles.py`. The core pages suit K–12 outreach; a "Going further" page covers period,
+  wavelength, and power for an introductory physics or engineering course. The student copy and
+  the answer key build from the same LaTeX source.
+
 ## License
 
 Licensed under the [Creative Commons Attribution 4.0 International License](LICENSE)

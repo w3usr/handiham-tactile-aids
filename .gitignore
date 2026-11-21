@@ -1,0 +1,9 @@
+# LaTeX intermediates (R8)
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out
+*.synctex.gz
+# local previews
+worksheets/_*.png
