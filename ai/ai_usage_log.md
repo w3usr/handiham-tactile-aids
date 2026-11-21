@@ -71,4 +71,23 @@ Date and time come from the system clock via `date`, never from an estimate.
   axis words match liblouis `en-ueb-g1.ctb` exactly; a top-view render of the exported STL shows
   print and Braille in place. Not yet viewed in a browser, and the printed Braille has not been
   read by a Braille reader.
-- **Git Hash**: 2ac1765 (PR pending)
+- **Git Hash**: 2ac1765 (PR #3)
+
+## [2026-11-21 20:32 UTC]
+- **Tool**: Claude (Anthropic), claude-opus-5-5
+- **Session Purpose**: Write the teaching materials that go with the board, following a review
+  recommendation relayed by N. A. Frissell: an activity guide for a teacher guiding a blind
+  student, with closing questions, and a write-in worksheet for sighted students (K–12 core plus
+  an introductory physics and engineering extension).
+- **Sections/Files Affected**: `worksheets/` (new: `activity-guide.md` and its HTML, PDF, and BRF
+  outputs; `write-in-worksheet.tex` with student and answer-key PDFs; `make_profiles.py` and
+  `profiles.pdf`; `make_brf.py`; `build.sh`; `guide-style.html`), `brief.html` (links to the
+  materials), `README.md`, `.gitignore` (new), `ai/ai_usage_log.md` (this entry; PR #3 recorded
+  for the previous entry)
+- **Nature of Contribution**: Draft / Code generation
+- **Human Review Status**: Pending review. Checked: the full build runs without errors; the
+  student worksheet is 3 pages and the key 5; the profile figure prints at 178.4 mm wide, 1:1
+  with the board's tiles; every BRF line is at most 40 cells, and sample lines back-translate to
+  the source text with liblouis. Not yet read by a teacher, and the BRF has not been read by a
+  Braille reader or reviewed by a transcriber.
+- **Git Hash**: 0362358 (PR pending)
