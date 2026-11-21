@@ -18,7 +18,7 @@ Entries are appended newest at the bottom.
 - **Sections/Files Affected**: The specific files or documents touched
 - **Nature of Contribution**: Draft / Edit / Analysis / Code generation / Research / Scaffolding
 - **Human Review Status**: Reviewed and verified / Partially reviewed / Pending review
-- **Git Hash**: Filled in after committing
+- **Git Hash**: 7318e84 (PR pending)
 ```
 
 Date and time come from the system clock via `date`, never from an estimate.
@@ -40,4 +40,4 @@ Date and time come from the system clock via `date`, never from an estimate.
 - **Human Review Status**: Pending review. Geometry and STL export were checked in Node.js
   against three.js 0.160.0 (184 × 184 × 18 mm, waves facing +z); the in-browser rendering has
   not yet been viewed.
-- **Git Hash**: Filled in after committing
+- **Git Hash**: 7318e84 (PR pending)
